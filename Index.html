@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disponibilités AG Horeca</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f5f5f5;
+    margin:0;
+    padding:20px;
+    color:#222;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.day{
+    border-bottom:1px solid #eee;
+    padding:15px 0;
+}
+
+.date{
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.slots{
+    display:flex;
+    gap:10px;
+}
+
+.slot{
+    padding:10px 15px;
+    border-radius:10px;
+    color:white;
+    font-weight:bold;
+}
+
+.available{
+    background:#16a34a;
+}
+
+.unavailable{
+    background:#dc2626;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Disponibilités AG Horeca</h1>
+
+<div id="calendar"></div>
+
+</div>
+
+<script>
+const calendarId = 'TON_CALENDAR_ID';
+const apiKey = 'TON_API_KEY';
+
+async function loadCalendar() {
+
+const today = new Date().toISOString();
+
+const url =
+`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${today}&maxResults=20&orderBy=startTime&singleEvents=true`;
+
+const response = await fetch(url);
+const data = await response.json();
+
+const container = document.getElementById('calendar');
+
+data.items.forEach(event => {
+
+const day = document.createElement('div');
+day.className = 'day';
+
+const title = event.summary || '';
+
+let status = 'unavailable';
+let label = 'Indisponible';
+
+if(title.toUpperCase().includes('MATIN')){
+    status = 'available';
+    label = 'Disponible matin';
+}
+
+if(title.toUpperCase().includes('SOIR')){
+    status = 'available';
+    label = 'Disponible soir';
+}
+
+day.innerHTML = `
+<div class="date">
+${new Date(event.start.dateTime || event.start.date).toLocaleDateString('fr-FR')}
+</div>
+
+<div class="slots">
+<div class="slot ${status}">
+${label}
+</div>
+</div>
+`;
+
+container.appendChild(day);
+
+});
+
+}
+
+loadCalendar();
+</script>
+
+</body>
+</html>
